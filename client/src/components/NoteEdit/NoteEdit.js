@@ -8,7 +8,7 @@ import Button from 'react-bootstrap/Button';
 import ListGroup from 'react-bootstrap/ListGroup';
 import { Link, withRouter } from 'react-router-dom';
 import axios from "axios";
-const API = 'http://localhost:5000/api';
+const API = 'https://localhost:5000';
 
 
 const NoteEdit = props => {

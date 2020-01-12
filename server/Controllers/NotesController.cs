@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 namespace NTR5.Controllers
 {
     [ApiController]
+    [EnableCors("MyPolicy")]
     [Route("[controller]")]
     public class NotesController : ControllerBase
     {
@@ -27,9 +28,12 @@ namespace NTR5.Controllers
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult Get()
+        public IActionResult Get(int page, DateTime dateTo, DateTime dateFrom, string category)
         {
-            return Ok(_context.Note.ToArray());
+            //var notes = _context.Note.ToArray();
+            var categories = _context.Category.ToArray();
+            PaginatedList<Note> list = new PaginatedList<Note>(_context.Note.ToList(),page,4);
+            return Ok(new { notes=list.ToList(), categories=categories.Select(c => c.Name), pager= new {currentPage=list.PageIndex, endPage=list.TotalPages }});
         }
 
         [HttpGet("{id}")]

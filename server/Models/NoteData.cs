@@ -14,17 +14,17 @@ namespace NTR5.Models
         public string Title { get; set; }
 
         public bool Markdown {get;set;}
-        public DateTime NoteDate { get; set; }
+        public DateTime Date { get; set; }
         public ICollection<String> NoteCategories { get; set; }
-        public string Description { get; set; }
+        public string Text { get; set; }
         public byte[] Timestamp { get; set; }
         public NoteData(Note note){
             NoteID=note.Idnote;
             Title=note.Title;
-            NoteDate=note.Date;
+            Date=note.Date;
             Markdown = note.IsMarkdown==1?true:false;
             NoteCategories=note.NoteCategory.Select(nc => nc.IdcategoryNavigation.Name).ToList();
-            Description=note.Description;
+            Text=note.Description;
             Timestamp=note.Timestamp;
         }
     }

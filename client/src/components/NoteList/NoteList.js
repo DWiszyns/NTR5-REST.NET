@@ -7,7 +7,7 @@ import Table from 'react-bootstrap/Table'
 import axios from 'axios';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-const API = 'http://localhost:5000/api';
+const API = 'https://localhost:5001';
 
 
 
@@ -157,10 +157,10 @@ class NoteList extends  Component {
                             <td>{n.title}</td>
                             <td>{n.date}</td>
                             <td>
-                                <Link to={`/notes/edit/${n.title}`}>
+                                <Link to={`/notes/edit/${n.noteID}`}>
                                     <Button type="button" variant="secondary">Edit</Button>
                                 </Link>
-                                <Button type="button" variant="secondary" onClick={() => this.deleteNote(n.title)}>Delete</Button>
+                                <Button type="button" variant="secondary" onClick={() => this.deleteNote(n.noteID)}>Delete</Button>
                             </td>
                         </tr>
                     )

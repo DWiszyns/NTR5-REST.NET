@@ -52,6 +52,7 @@ namespace NTR5
             app.UseRouting();
 
             app.UseAuthorization();
+
             app.UseCors("MyPolicy");
 
             app.UseEndpoints(endpoints =>
