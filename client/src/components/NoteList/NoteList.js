@@ -18,7 +18,7 @@ class NoteList extends  Component {
             dateFrom: localStorage.getItem("dateFrom") || moment(new Date().setMonth(2)).format("YYYY-MM-DD"),
             dateTo: localStorage.getItem("dateTo")  || moment(new Date()).format("YYYY-MM-DD"),
             category: localStorage.getItem("category")  || '',
-            page: localStorage.getItem("page")  || 1,
+            page: parseInt(localStorage.getItem("page"))  || 1,
             notes:[],
             categories:[],
             pager:{}
@@ -40,6 +40,7 @@ class NoteList extends  Component {
                 currState.pager=pager;
                 currState.notes=notes ? JSON.parse(JSON.stringify(notes)) : [];
                 currState.categories=categories ? [{title:''}].concat(JSON.parse(JSON.stringify(categories))):[];
+                currState.page = currState.page > pager.endPage ? 1 : currState.page
                 localStorage.setItem("page",this.state.page)
                 localStorage.setItem("dateTo",this.state.dateTo)
                 localStorage.setItem("dateFrom",this.state.dateFrom)
@@ -137,7 +138,7 @@ class NoteList extends  Component {
                                           }}
                                           value={this.state.category}>
                                 {this.state.categories.map(c => (
-                                        <option>{c.title}</option>
+                                        <option>{c.name}</option>
                                     )
                                 )}
                             </Form.Control>
@@ -157,10 +158,10 @@ class NoteList extends  Component {
                             <td>{n.title}</td>
                             <td>{n.date}</td>
                             <td>
-                                <Link to={`/notes/edit/${n.noteID}`}>
+                                <Link to={`/notes/edit/${n.idnote}`}>
                                     <Button type="button" variant="secondary">Edit</Button>
                                 </Link>
-                                <Button type="button" variant="secondary" onClick={() => this.deleteNote(n.noteID)}>Delete</Button>
+                                <Button type="button" variant="secondary" onClick={() => this.deleteNote(n.idnote)}>Delete</Button>
                             </td>
                         </tr>
                     )

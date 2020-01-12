@@ -26,7 +26,7 @@ render() {
       <Router>
         <Container>
           <Route exact path="/notes/new" component={NoteNew} />
-          <Route exact path="/notes/edit/:title" component={NoteContainer} />
+          <Route exact path="/notes/edit/:idnote" component={NoteContainer} />
           <Route exact path="/" component={NoteList} />
         </Container>
       </Router>

@@ -8,14 +8,14 @@ import Button from 'react-bootstrap/Button';
 import ListGroup from 'react-bootstrap/ListGroup';
 import { Link, withRouter } from 'react-router-dom';
 import axios from "axios";
-const API = 'https://localhost:5000';
+const API = 'https://localhost:5001';
 
 
 const NoteEdit = props => {
     const title = props.title || 'Enter title';
     const text = props.content || (props.title? '':'Enter text');
     const markdown = props.markdown || false;
-    const date = props.date || moment(new Date()).format("YYYY-MM-DD");
+    const date = moment(props.date).format("YYYY-MM-DD")|| moment(new Date()).format("YYYY-MM-DD");
     const mode = props.mode==='new'? props.mode : 'edit';
     const newCategory = '';
     const [selectedCategory, setSelectedCategory] = React.useState('');
@@ -85,7 +85,7 @@ const NoteEdit = props => {
         }
         else{
             axios
-                .put(`${API}/notes/${props.title}`,{
+                .put(`${API}/notes/${props.noteid}`,{
                 title: values.title,
                 text: values.text,
                 markdown: values.markdown,
@@ -168,7 +168,7 @@ const NoteEdit = props => {
                     <Form.Group>
                         <Form.Label>Note's categories</Form.Label><br/>
                         <ListGroup>
-                            {categories.map(({title}) => (
+                            {categories.map((title) => (
                                 <Row>
                                     <ListGroup.Item type="button" onClick={() => selectCategory(title)} variant="outline-secondary"
                                                     action key={title}>{title}</ListGroup.Item>

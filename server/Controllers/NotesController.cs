@@ -33,7 +33,7 @@ namespace NTR5.Controllers
             //var notes = _context.Note.ToArray();
             var categories = _context.Category.ToArray();
             PaginatedList<Note> list = new PaginatedList<Note>(_context.Note.ToList(),page,4);
-            return Ok(new { notes=list.ToList(), categories=categories.Select(c => c.Name), pager= new {currentPage=list.PageIndex, endPage=list.TotalPages }});
+            return Ok(new { notes=list.ToList(), categories=categories, pager= new {currentPage=list.PageIndex, endPage=list.TotalPages }});
         }
 
         [HttpGet("{id}")]
@@ -45,7 +45,8 @@ namespace NTR5.Controllers
                 return NotFound();
             }
             Note note = _context.Note.Where(n=>n.Idnote==id).Include(n => n.NoteCategory).ThenInclude(nc => nc.IdcategoryNavigation).FirstOrDefault();
-            return Ok(new NoteData(note));
+            //return Ok(note);
+            return Ok(new {data=new NoteData(note)});
         }
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
