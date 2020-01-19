@@ -4,11 +4,11 @@ import moment from 'moment'
 import Button from 'react-bootstrap/Button';
 import { Link, withRouter } from 'react-router-dom';
 import Table from 'react-bootstrap/Table'
+import ButtonToolbar from 'react-bootstrap/ButtonToolbar'
 import axios from 'axios';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 const API = 'https://localhost:5001';
-
 
 
 class NoteList extends  Component {
@@ -158,10 +158,10 @@ class NoteList extends  Component {
                             <td>{n.title}</td>
                             <td>{n.date}</td>
                             <td>
-                                <Link to={`/notes/edit/${n.idnote}`}>
-                                    <Button type="button" variant="secondary">Edit</Button>
-                                </Link>
-                                <Button type="button" variant="secondary" onClick={() => this.deleteNote(n.idnote)}>Delete</Button>
+                                    <Link to={`/notes/edit/${n.idnote}`}>
+                                        <Button type="button" variant="secondary" style={{marginRight:"5px"}} >Edit</Button>
+                                    </Link>
+                                    <Button type="button" variant="secondary" onClick={() => this.deleteNote(n.idnote)}>Delete</Button>
                             </td>
                         </tr>
                     )

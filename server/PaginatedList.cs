@@ -17,6 +17,7 @@ namespace NTR5
             {
                 TotalPages = 1;
             }
+            PageIndex = PageIndex <= TotalPages ? PageIndex : TotalPages;
             items = items.Count != 0 ? items.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList() : new List<T>();
             this.AddRange(items);
         }
