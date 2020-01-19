@@ -40,8 +40,8 @@ const NoteEdit = props => {
         const errors={}
         if(newCategory!=='')
         {
-            if(categories.filter(c=>c.title===newCategory).length===0)
-                setCategories(categories.concat({title: newCategory}))
+            if(categories.filter(c=>c===newCategory).length===0)
+                setCategories(categories.concat(newCategory))
         }
         else {
             alert('Can\'t add empty category')
@@ -57,11 +57,12 @@ const NoteEdit = props => {
     const handleRemoveCategory = e =>{
         if(selectedCategory!=null || selectedCategory !== undefined)
         {
-            setCategories(categories.filter(c=>c.title!==selectedCategory))
+            setCategories(categories.filter(c=>c!==selectedCategory))
         }
     }
 
     const handleOnSubmit = (values) => {
+        debugger;
         if(mode==='new'){
             axios
                 .post(`${API}/notes`, {
@@ -69,10 +70,11 @@ const NoteEdit = props => {
                     text: values.text,
                     markdown: values.markdown,
                     date: values.date,
-                    noteCategories: categories,
+                    noteCategories: values.categories,
                 })
                 .then(res => {
-                    if (res.data !== 'Success') {
+                    console.log(res);
+                    if (res.status !== 200) {
                         setErrorMessage(res.data);
                     } else {
                         props.history.push('/'); //go back to main menu
@@ -85,15 +87,15 @@ const NoteEdit = props => {
         }
         else{
             axios
-                .put(`${API}/notes/${props.noteid}`,{
+                .put(`${API}/notes/${props.idnote}`,{
                 title: values.title,
                 text: values.text,
                 markdown: values.markdown,
                 date: values.date,
-                noteCategories: categories,
+                noteCategories: values.categories,
                 }) //old title
                 .then(res=> {
-                    if (res.data !== 'Success') {
+                    if (res.status !== 200) {
                         setErrorMessage(res.data);
                     } else {
                         props.history.push('/'); //go back to main menu

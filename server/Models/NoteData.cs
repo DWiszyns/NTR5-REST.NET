@@ -18,6 +18,9 @@ namespace NTR5.Models
         public ICollection<String> NoteCategories { get; set; }
         public string Text { get; set; }
         public byte[] Timestamp { get; set; }
+        public NoteData(){
+            
+        }
         public NoteData(Note note){
             NoteID=note.Idnote;
             Title=note.Title;

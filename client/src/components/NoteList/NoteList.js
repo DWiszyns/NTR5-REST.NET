@@ -66,7 +66,7 @@ class NoteList extends  Component {
         axios
             .delete(`${API}/notes/${title}`)
             .then(res => {
-                if (res.data === 'Success') {
+                if (res.status === 200) {
                     this.loadPage()
                 }
             })

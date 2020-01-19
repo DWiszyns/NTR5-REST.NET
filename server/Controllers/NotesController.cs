@@ -37,8 +37,8 @@ namespace NTR5.Controllers
             List<Note> notes = new List<Note> { };
             foreach (var n in allNotes)
             {
-                Note tmpNote = _context.Note.Include(i => i.NoteCategory).ThenInclude(noteCategories => noteCategories.IdcategoryNavigation).FirstOrDefault(note => note.Idnote == n.Idnote);
-                if (tmpNote.Date >= dateFrom && tmpNote.Date <= dateTo && (category == "" || tmpNote.NoteCategory.Where(m => m.IdcategoryNavigation.Name == category).Any()))
+                if (n.Date >= dateFrom && n.Date <= dateTo && (String.IsNullOrEmpty(category) ||
+                    _context.NoteCategory.Where(m => m.IdcategoryNavigation.Name == category && m.Idnote == n.Idnote).Any()))
                 {
                     notes.Add(n);
                 }
@@ -62,7 +62,7 @@ namespace NTR5.Controllers
         }
 
         [HttpPost]
-        [Consumes(MediaTypeNames.Application.Json)]
+        // [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -102,7 +102,7 @@ namespace NTR5.Controllers
                 return NotFound();
             }
             oldNote = _context.Note.Include(i => i.NoteCategory).ThenInclude(noteCategories => noteCategories.IdcategoryNavigation).FirstOrDefault(n => n.Idnote == oldNote.Idnote);
-            if (_context.Note.Where(n => n.Title == note.Title && n.Idnote != note.NoteID).Any())
+            if (_context.Note.Where(n => n.Title == note.Title && n.Idnote != id).Any())
             {
                 return StatusCode(400, "Note with title - " + note.Title + " - already exists");
             }
@@ -167,9 +167,27 @@ namespace NTR5.Controllers
             _context.SaveChanges();
             return Ok();
         }
-        private void updateCategories(int id, ICollection<String> NoteCategories)
+        private void updateCategories(int id, ICollection<String> newNoteCategories)
         {
-            Array.ForEach(NoteCategories.ToArray(), c =>
+            Note original = _context.Note.Include(i => i.NoteCategory).ThenInclude(nCategories => nCategories.IdcategoryNavigation).FirstOrDefault(n => n.Idnote == id);
+            foreach (var category in original.NoteCategory)
+            {
+                if (!newNoteCategories.Where(c => c == category.IdcategoryNavigation.Name).Any())
+                {
+                    if (!_context.NoteCategory.Where(i => i.Idcategory == category.IdcategoryNavigation.Idcategory
+                             && i.Idnote != id).Any())
+                    {
+                        _context.NoteCategory.Remove(category); //to delete notecategory
+                        _context.Category.Remove(category.IdcategoryNavigation); //to delete category
+                    }
+                    else
+                    {
+                        _context.NoteCategory.Remove(category); //to delete notecategory
+                    }
+                }
+            }
+            _context.SaveChanges();
+            Array.ForEach(newNoteCategories.ToArray(), c =>
             {
                 try
                 {
@@ -187,12 +205,16 @@ namespace NTR5.Controllers
                         {
                             category = occurances.FirstOrDefault();
                         }
-                        _context.NoteCategory.Add(new NoteCategory
+                        if (!_context.NoteCategory.Where(nc => nc.Idcategory == category.Idcategory && nc.Idnote == id).Any())
                         {
-                            Idnote = id,
-                            Idcategory = category.Idcategory
-                        });
+                            _context.NoteCategory.Add(new NoteCategory
+                            {
+                                Idnote = id,
+                                Idcategory = category.Idcategory
+                            });
+                        }
                         _context.SaveChanges();
+
                         transaction.Commit();
                     }
                 }
@@ -208,13 +230,13 @@ namespace NTR5.Controllers
             string error = "";
             if (databaseValues.Title != clientValues.Title)
                 error += "Title" + "Current value: "
-                    + databaseValues.Title+"\n";
+                    + databaseValues.Title + "\n";
             if (databaseValues.Description != clientValues.Description)
                 error += "Description" + "Current value: "
-                    + String.Format("{0:c}", databaseValues.Description)+"\n";
+                    + String.Format("{0:c}", databaseValues.Description) + "\n";
             if (databaseValues.Date != clientValues.Date)
                 error += "NoteDate" + "Current value: "
-                    + String.Format("{0:d}", databaseValues.Date)+"\n";
+                    + String.Format("{0:d}", databaseValues.Date) + "\n";
             return error;
         }
 
