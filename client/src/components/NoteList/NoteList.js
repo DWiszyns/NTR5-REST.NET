@@ -40,7 +40,7 @@ class NoteList extends Component {
                 const currState = this.state;
                 currState.pager = pager;
                 currState.notes = notes ? JSON.parse(JSON.stringify(notes)) : [];
-                currState.categories = categories ? [{title: ''}].concat(JSON.parse(JSON.stringify(categories))) : [];
+                currState.categories = ['', ...categories];
                 currState.page = currState.page > pager.endPage ? 1 : currState.page
                 localStorage.setItem("page", this.state.page)
                 localStorage.setItem("dateTo", this.state.dateTo)
@@ -143,8 +143,8 @@ class NoteList extends Component {
                                           this.handleChange(e);
                                       }}
                                       value={this.state.category}>
-                            {this.state.categories.map(c => (
-                                    <option>{c.name}</option>
+                            {this.state.categories.map((c,i) => (
+                                    <option key={i} label={c}>{c}</option>
                                 )
                             )}
                         </Form.Control>
@@ -165,11 +165,11 @@ class NoteList extends Component {
                             <td style={{width:"500px"}}>{n.title}</td>
                             <td>{n.date}</td>
                             <td>
-                                <Link to={`/notes/edit/${n.idnote}`}>
+                                <Link to={`/notes/edit/${n.noteID}`}>
                                     <Button type="button" variant="secondary" style={{marginRight: "5px"}}>Edit</Button>
                                 </Link>
                                 <Button type="button" variant="secondary"
-                                        onClick={() => this.deleteNote(n.idnote)}>Delete</Button>
+                                        onClick={() => this.deleteNote(n.noteID)}>Delete</Button>
                             </td>
                         </tr>
                     )

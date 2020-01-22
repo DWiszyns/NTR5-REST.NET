@@ -30,22 +30,28 @@ namespace NTR5.Controllers
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult Get(int page, DateTime dateTo, DateTime dateFrom, string category)
+        public IActionResult Get(int page, string dateTo, string dateFrom, string category)
         {
-            var allNotes = _context.Note.ToArray();
+            var notes = _context.Note.Include(n => n.NoteCategory).ThenInclude(nc => nc.IdcategoryNavigation).ToList();
             var categories = _context.Category.ToArray();
-            List<Note> notes = new List<Note> { };
-            foreach (var n in allNotes)
+            var newNotes = new List<NoteData>{};
+            if (category != null && category != "")
             {
-                if (n.Date >= dateFrom && n.Date <= dateTo && (String.IsNullOrEmpty(category) ||
-                    _context.NoteCategory.Where(m => m.IdcategoryNavigation.Name == category && m.Idnote == n.Idnote).Any()))
-                {
-                    notes.Add(n);
-                }
+                notes = notes.Where(n => n.NoteCategory.Any(nc => nc.IdcategoryNavigation.Name.Equals(category))).ToList();
             }
-
-            PaginatedList<Note> list = new PaginatedList<Note>(notes, page, 4);
-            return Ok(new { notes = list.ToList(), categories = categories, pager = new { currentPage = list.PageIndex, endPage = list.TotalPages } });
+            if (dateFrom != null && dateFrom != "Invalid date" && dateFrom != "null")
+            {
+                notes = notes.Where(n => n.Date >= Convert.ToDateTime(dateFrom)).ToList();
+            }
+            if (dateTo != null && dateTo != "Invalid date" && dateTo != "null")
+            {
+                notes = notes.Where(n => n.Date <= Convert.ToDateTime(dateTo)).ToList();
+            }
+            foreach(var n in notes){
+                newNotes.Add(new NoteData(n));
+            }
+            PaginatedList<NoteData> list = new PaginatedList<NoteData>(newNotes, page, 4);
+            return Ok(new { notes = list.ToList(), categories = categories.Select(c=>c.Name), pager = new { currentPage = list.PageIndex, endPage = list.TotalPages } });
         }
 
         [HttpGet("{id}")]
@@ -109,10 +115,10 @@ namespace NTR5.Controllers
             _context.Entry(oldNote).Property("Timestamp").OriginalValue = note.Timestamp;
             try
             {
-                oldNote.Title=note.Title;
-                oldNote.Description=note.Text;
-                oldNote.Date=note.Date;
-                oldNote.IsMarkdown=Convert.ToInt16(note.Markdown);
+                oldNote.Title = note.Title;
+                oldNote.Description = note.Text;
+                oldNote.Date = note.Date;
+                oldNote.IsMarkdown = Convert.ToInt16(note.Markdown);
                 await _context.SaveChangesAsync();
                 updateCategories(oldNote.Idnote, note.NoteCategories);
             }
@@ -132,8 +138,8 @@ namespace NTR5.Controllers
                     return StatusCode(403, "The record you attempted to edit "
                         + "was modified by another user after you got the original value. The "
                         + "edit operation was canceled and the current values in the database "
-                        + "have been displayed. If you still want to edit this record, click "
-                        + "the Save button again. Otherwise click the Back to List hyperlink. Current values:\n" + error);
+                        + "have been displayed. Click the Back to List hyperlink and if you "
+                        + "still want to edit please re-enter Note. Current values:\n" + error);
                 }
             }
             catch (DbUpdateException ex)
@@ -157,7 +163,8 @@ namespace NTR5.Controllers
             foreach (var category in note.NoteCategory)
             {
                 _context.NoteCategory.Remove(category);
-                if (_context.NoteCategory.Where(i => i.Idcategory == category.IdcategoryNavigation.Idcategory).FirstOrDefault() == null)
+                if (!_context.NoteCategory.Where(i => i.Idcategory == category.Idcategory
+                             && i.Idnote != id).Any())
                 {
                     _context.Category.Remove(category.IdcategoryNavigation);
                 }
@@ -172,7 +179,7 @@ namespace NTR5.Controllers
             Note original = _context.Note.Include(i => i.NoteCategory).ThenInclude(nCategories => nCategories.IdcategoryNavigation).FirstOrDefault(n => n.Idnote == id);
             foreach (var category in original.NoteCategory)
             {
-                if (!newNoteCategories.Where(c => c == category.IdcategoryNavigation.Name).Any())
+                if (!newNoteCategories.Where(c => c == category.IdcategoryNavigation.Name).Any())//if in new there is no category with this name then delete it
                 {
                     if (!_context.NoteCategory.Where(i => i.Idcategory == category.IdcategoryNavigation.Idcategory
                              && i.Idnote != id).Any())

@@ -82,6 +82,7 @@ const NoteEdit = props => {
                     }
                 })
                 .catch(err => {
+                    setErrorMessage(err.response.data);
                     console.log(err);
                 });
 
