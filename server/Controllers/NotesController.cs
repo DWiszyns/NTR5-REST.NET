@@ -107,38 +107,38 @@ namespace NTR5.Controllers
                 return StatusCode(400, "Note with title - " + note.Title + " - already exists");
             }
             _context.Entry(oldNote).Property("Timestamp").OriginalValue = note.Timestamp;
-            if (await TryUpdateModelAsync<Note>(oldNote, "Note",
-                n => n.Title, n => n.Description, n => n.Date))
+            try
             {
-                try
+                oldNote.Title=note.Title;
+                oldNote.Description=note.Text;
+                oldNote.Date=note.Date;
+                oldNote.IsMarkdown=Convert.ToInt16(note.Markdown);
+                await _context.SaveChangesAsync();
+                updateCategories(oldNote.Idnote, note.NoteCategories);
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                var entry = ex.Entries.Single();
+                var clientValues = (Note)entry.Entity;
+                var databaseEntry = entry.GetDatabaseValues();
+                if (databaseEntry == null)
                 {
-                    await _context.SaveChangesAsync();
-                    updateCategories(oldNote.Idnote, note.NoteCategories);
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException ex)
+                else
                 {
-                    var entry = ex.Entries.Single();
-                    var clientValues = (Note)entry.Entity;
-                    var databaseEntry = entry.GetDatabaseValues();
-                    if (databaseEntry == null)
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        var databaseValues = (Note)databaseEntry.ToObject();
-                        string error = getConcurrencyErrors(clientValues, databaseValues);
-                        return StatusCode(403, "The record you attempted to edit "
-                            + "was modified by another user after you got the original value. The "
-                            + "edit operation was canceled and the current values in the database "
-                            + "have been displayed. If you still want to edit this record, click "
-                            + "the Save button again. Otherwise click the Back to List hyperlink. Current values:\n" + error);
-                    }
+                    var databaseValues = (Note)databaseEntry.ToObject();
+                    string error = getConcurrencyErrors(clientValues, databaseValues);
+                    return StatusCode(403, "The record you attempted to edit "
+                        + "was modified by another user after you got the original value. The "
+                        + "edit operation was canceled and the current values in the database "
+                        + "have been displayed. If you still want to edit this record, click "
+                        + "the Save button again. Otherwise click the Back to List hyperlink. Current values:\n" + error);
                 }
-                catch (DbUpdateException ex)
-                {
-                    return StatusCode(500, ex.InnerException.Message);
-                }
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(500, ex.InnerException.Message);
             }
             return Ok();
         }
@@ -229,13 +229,13 @@ namespace NTR5.Controllers
         {
             string error = "";
             if (databaseValues.Title != clientValues.Title)
-                error += "Title" + "Current value: "
+                error += "Title " + "Current value: "
                     + databaseValues.Title + "\n";
             if (databaseValues.Description != clientValues.Description)
-                error += "Description" + "Current value: "
+                error += "Description " + "Current value: "
                     + String.Format("{0:c}", databaseValues.Description) + "\n";
             if (databaseValues.Date != clientValues.Date)
-                error += "NoteDate" + "Current value: "
+                error += "NoteDate " + "Current value: "
                     + String.Format("{0:d}", databaseValues.Date) + "\n";
             return error;
         }

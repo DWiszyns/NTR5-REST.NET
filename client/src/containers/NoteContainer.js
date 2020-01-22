@@ -30,6 +30,7 @@ const NoteContainer = props => {
                 noteCategories={note.noteCategories}
                 markdown={note.markdown}
                 date={note.date}
+                timestamp={note.timestamp}
             />}
         </div>
     );

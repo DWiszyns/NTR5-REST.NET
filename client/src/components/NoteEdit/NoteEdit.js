@@ -19,6 +19,7 @@ const NoteEdit = props => {
     const markdown = props.markdown || false;
     const date = moment(props.date).format("YYYY-MM-DD") || moment(new Date()).format("YYYY-MM-DD");
     const mode = props.mode === 'new' ? props.mode : 'edit';
+    const timestamp = props.timestamp;
     const newCategory = '';
     const [selectedCategory, setSelectedCategory] = React.useState('');
     const [removeEnabled, setRemoveEnabled] = React.useState(false);
@@ -70,6 +71,7 @@ const NoteEdit = props => {
                     markdown: values.markdown,
                     date: values.date,
                     noteCategories: values.categories,
+                    timestamp: timestamp
                 })
                 .then(res => {
                     console.log(res);
@@ -91,6 +93,7 @@ const NoteEdit = props => {
                     markdown: values.markdown,
                     date: values.date,
                     noteCategories: values.categories,
+                    timestamp: timestamp
                 }) //old title
                 .then(res => {
                     if (res.status !== 200) {
@@ -100,6 +103,7 @@ const NoteEdit = props => {
                     }
                 })
                 .catch(err => {
+                    setErrorMessage(err.response.data);
                     console.log(err);
                 });
 
@@ -195,7 +199,7 @@ const NoteEdit = props => {
                         </Form.Row>
 
                         <Row>
-                            <Button variant="primary" type="submit" style={{marginRight: "5px"}} title="Submit">Create
+                            <Button variant="primary" type="submit" style={{marginRight: "5px"}} title="Submit">Save
                                 note</Button>
                             <Link to={'/'}>
                                 <Button type="button" variant="dark">Back to list</Button>
