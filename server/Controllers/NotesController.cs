@@ -61,7 +61,7 @@ namespace NTR5.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return StatusCode(404,"Note not found");
             }
             Note note = _context.Note.Where(n => n.Idnote == id).Include(n => n.NoteCategory).ThenInclude(nc => nc.IdcategoryNavigation).FirstOrDefault();
             return Ok(new { data = new NoteData(note) });
@@ -105,7 +105,7 @@ namespace NTR5.Controllers
             {
                 Note deletedNote = new Note();
                 await TryUpdateModelAsync(deletedNote);
-                return NotFound();
+                return StatusCode(404,"Note was deleted");;
             }
             oldNote = _context.Note.Include(i => i.NoteCategory).ThenInclude(noteCategories => noteCategories.IdcategoryNavigation).FirstOrDefault(n => n.Idnote == oldNote.Idnote);
             if (_context.Note.Where(n => n.Title == note.Title && n.Idnote != id).Any())
@@ -129,7 +129,7 @@ namespace NTR5.Controllers
                 var databaseEntry = entry.GetDatabaseValues();
                 if (databaseEntry == null)
                 {
-                    return NotFound();
+                    return StatusCode(404,"Note was deleted");;
                 }
                 else
                 {
